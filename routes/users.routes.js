@@ -45,6 +45,7 @@ router.post('', (req, res) => {
     });
 });
 
+
 function executeQuery(connection) {
     const request = new Request("SELECT * FROM followers", (error, rowCount) => {
         if (error) {
