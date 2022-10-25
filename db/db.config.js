@@ -3,7 +3,7 @@ const Config = {
     authentication: {
         type: 'default',
         options: {
-            userName: process.env.userName,
+            userName: process.env.user_name,
             password: process.env.password
         }
     },
