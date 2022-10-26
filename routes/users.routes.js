@@ -37,9 +37,10 @@ router.get('/', (req, res) => {
     connection.connect();
 });
 
-router.post('', (req, res) => {
+router.post('/', (req, res) => {
 
-    const { name, email } = req.body;
+    const { userName, email } = req.body;
+    const connection = new Connection(Config);
 
     connection.on("connect", (error) => {
         if (error) {
@@ -48,47 +49,19 @@ router.post('', (req, res) => {
             //close connection
             connection.close();
         } else {
-            const request = new Request("INSERT INTO Followers (name, email) VALUES(@name, @email);", (error, rowCount) => {
+            const request = new Request("INSERT INTO Followers (userName, email) VALUES(@userName, @email);", (error, rowCount) => {
                 if (error) {
-                    // console.log(error);
-                    //close connection
                     connection.close();
                     return res.status(500).json({ error: "Server Error, try again later" });
                 }
                 return res.status(200).json({ message: "User saved" });
             });
-            request.addParameter("name", TYPES.VarChar, name);
+            request.addParameter("userName", TYPES.VarChar, userName);
             request.addParameter("email", TYPES.VarChar, email);
             connection.execSql(request);
         }
     });
+    connection.connect();
 });
-
-
-function executeQuery(connection) {
-    const followers = [];
-    const request = new Request("SELECT * FROM Followers", (error, rowCount) => {
-        if (error) {
-            console.log(error);
-            connection.close();
-        } else {
-            console.log(rowCount + ' rows');
-        }
-    });
-
-    const currentFollower = {};
-    request.on('column', (columns) => {
-        columns.forEach(column => {
-            currentFollower[column.metadata.colName] = column.value;
-        });
-        followers = [...followers, currentFollower];
-    });
-    request.on("requestCompleted", function () {
-        connection.close();
-        return followers;
-    })
-    connection.execSql(request);
-    return followers;
-}
 
 module.exports = router;
